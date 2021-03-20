@@ -7,7 +7,9 @@ import style from './style.module.css'
 import pikaBg from '../../../assets/bgSleepingPika.jpg'
 
 const FinishPage = () => {
-    const { isGameFinished, pokemonsSelected, oponetsHand, isPlayerWon, endGame } = useContext(PokemonContext)
+    const { isGameFinished, pokemonsSelected, oponetsHand, isPlayerWon, endGame } = useContext(
+        PokemonContext
+    )
     const history = useHistory()
     if (!isGameFinished) {
         history.replace('/game')
@@ -44,14 +46,33 @@ const FinishPage = () => {
 
     return (
         <>
-            <Layout title={`You ${isPlayerWon ? 'WON. Choose one card.' : 'LOOSE'}`} urlBg={pikaBg}>
+            <Layout
+                title={`You ${isPlayerWon ? 'WON. Choose one card.' : 'LOOSE'}`}
+                urlBg={pikaBg}
+                isPololygonDisabled={true}>
                 <div className={style['card-container']}>
                     {pokemonsSelected &&
-                        Object.values(pokemonsSelected).map(({ id, type, img, name, values, bgImg }) => (
-                            <PokemonCard key={id} id={id} type={type} img={img} name={name} values={values} bgImg={bgImg} isDisabled isActive className={style['large-card']} />
+                        Object.values(
+                            pokemonsSelected
+                        ).map(({ id, type, img, name, values, bgImg }) => (
+                            <PokemonCard
+                                key={id}
+                                id={id}
+                                type={type}
+                                img={img}
+                                name={name}
+                                values={values}
+                                bgImg={bgImg}
+                                isDisabled
+                                isActive
+                                className={style['large-card']}
+                            />
                         ))}
                 </div>
-                <button className={style['start-button']} disabled={selectedCard == null && isPlayerWon} onClick={handleGameEndClick}>
+                <button
+                    className={style['start-button']}
+                    disabled={selectedCard == null && isPlayerWon}
+                    onClick={handleGameEndClick}>
                     End Game
                 </button>
                 <div className={style['card-container']}>

@@ -2,6 +2,7 @@ class BackendApi {
     constructor() {
         this._oponentDeckUrl = 'https://reactmarathon-api.netlify.app/api/create-player'
         this._makeTurnUrl = 'https://reactmarathon-api.netlify.app/api/players-turn'
+        this._starterDeckUrl = 'https://reactmarathon-api.herokuapp.com/api/pokemons/starter'
     }
 
     getOponentHandAsync = async () => {
@@ -23,6 +24,11 @@ class BackendApi {
 
         // new board
         return (await response.json()).data
+    }
+
+    getStarterDeck = async () => {
+        const resp = await fetch(this._starterDeckUrl)
+        return (await resp.json()).data
     }
 }
 

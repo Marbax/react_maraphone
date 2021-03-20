@@ -1,17 +1,27 @@
-import { useState } from 'react'
-import { firebaseSignInUrl, firebaseSignUpUrl } from '../../services/firebase'
+import { useEffect, useState } from 'react'
+import FirebaseClass, { firebaseSignInUrl, firebaseSignUpUrl } from '../../services/firebase'
 import LoginForm from '../LoginForm'
 import Modal from '../Modal'
 import { NotificationManager } from 'react-notifications'
-
+import { useDispatch, useSelector } from 'react-redux'
+import { selectUser, getUserAsync } from '../../store/user'
+import BackendApiClass from '../../services/backendApi'
 import Menu from './Menu'
 import Navbar from './Navbar'
+import UserProfle from '../UserProfile'
 
 const MenuNavbar = ({ bgActive }) => {
     const [isMenuActive, setMenuActive] = useState(null)
     const [isModalOpen, setModalOpen] = useState(null)
     //state to display login or register form and to proccess submit differently
     const [isLoginForm, setLoginForm] = useState(true)
+    const [user, setUser] = useState(null)
+    const userRedux = useSelector(selectUser)
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        setUser({ ...userRedux })
+    }, [userRedux])
 
     const handleBurgerClick = () => setMenuActive((prevState) => !prevState)
     const handleLoginClick = () => setModalOpen((prevState) => !prevState)
@@ -36,7 +46,14 @@ const MenuNavbar = ({ bgActive }) => {
         } else {
             if (isLoginForm) {
                 localStorage.setItem('idToken', data.idToken)
-                localStorage.setItem('email', data.email)
+                localStorage.setItem('localId', data.localId)
+                dispatch(getUserAsync())
+            } else {
+                await FirebaseClass.postNewUsersDeck(
+                    data.localId,
+                    data.idToken,
+                    await BackendApiClass.getStarterDeck()
+                )
             }
             NotificationManager.success(
                 `${data?.email} successfully ${isLoginForm ? 'logined' : 'registered'}.`,
@@ -56,16 +73,31 @@ const MenuNavbar = ({ bgActive }) => {
                 onClickLogin={handleLoginClick}
             />
             <Menu isMenuActive={isMenuActive} handleLinkClick={handleBurgerClick} />
-            <Modal
-                clickCloseModal={handleModalCloseClick}
-                isOpen={isModalOpen}
-                title={isLoginForm ? 'Login...' : 'Register...'}>
-                <LoginForm
-                    isLoginForm={isLoginForm}
-                    onChangeFormState={handleChangeFormState}
-                    onSubmit={handleSubmitLoginForm}
-                    isActive={isModalOpen}></LoginForm>
-            </Modal>
+
+            {user?.email ? (
+                <Modal
+                    clickCloseModal={handleModalCloseClick}
+                    isOpen={isModalOpen}
+                    title={`Welcome ${user.email}`}>
+                    <UserProfle
+                        lastLoginAt={user.lastLoginAt}
+                        createdAt={user.createdAt}
+                        emailVerified={user.emailVerified}
+                    />
+                </Modal>
+            ) : (
+                <Modal
+                    clickCloseModal={handleModalCloseClick}
+                    isOpen={isModalOpen}
+                    title={isLoginForm ? 'Login...' : 'Register...'}>
+                    <LoginForm
+                        isLoginForm={isLoginForm}
+                        onChangeFormState={handleChangeFormState}
+                        onSubmit={handleSubmitLoginForm}
+                        isActive={isModalOpen}
+                    />
+                </Modal>
+            )}
         </>
     )
 }

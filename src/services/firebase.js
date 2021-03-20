@@ -5,11 +5,14 @@ import Pokemon from '../models/Pokemon'
 export const firebaseApiKey = 'AIzaSyASlp4cZJVb8_WdhrE6PJKgUy_ghYNjo2A'
 export const firebaseSignUpUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${firebaseApiKey}`
 export const firebaseSignInUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`
+export const firebaseUrl =
+    'https://pokemon-game-1f608-default-rtdb.europe-west1.firebasedatabase.app/'
+export const firebaseGetUserUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseApiKey}`
 
 const firebaseConfig = {
     apiKey: firebaseApiKey,
     authDomain: 'pokemon-game-1f608.firebaseapp.com',
-    databaseURL: 'https://pokemon-game-1f608-default-rtdb.europe-west1.firebasedatabase.app',
+    databaseURL: firebaseUrl,
     projectId: 'pokemon-game-1f608',
     storageBucket: 'pokemon-game-1f608.appspot.com',
     messagingSenderId: '564953470709',
@@ -44,14 +47,21 @@ class FirebaseService {
         this.database.ref(`pokemons/${key}`).set(this.normalizePokemon(poke))
     }
 
-    addPokemon = (poke, cb) => {
-        const newPostKey = this.database.ref().child('pokemons').push().key
-        this.database
-            .ref(`pokemons/${newPostKey}`)
-            .set(this.normalizePokemon(poke))
-            .then(() => {
-                cb && cb()
+    addPokemon = async (userid, tokenId, card, cb) => {
+        await fetch(`${firebaseUrl}${userid}/pokemons.json?auth=${tokenId}`, {
+            method: 'POST',
+            body: JSON.stringify(new Pokemon({ ...card })),
+        })
+        cb && cb()
+    }
+
+    postNewUsersDeck = async (userid, tokenId, cards) => {
+        for (const card of cards) {
+            await fetch(`${firebaseUrl}${userid}/pokemons.json?auth=${tokenId}`, {
+                method: 'POST',
+                body: JSON.stringify(new Pokemon({ ...card })),
             })
+        }
     }
 }
 

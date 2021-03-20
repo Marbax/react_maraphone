@@ -12,9 +12,19 @@ import NotFound from './routes/NotFound'
 import FirebaseClass from './services/firebase'
 
 import 'react-notifications/lib/notifications.css'
+import { useDispatch } from 'react-redux'
+import { getUserAsync } from './store/user'
+import { useEffect } from 'react'
 
 const App = () => {
     const isRoot = useRouteMatch('/')
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        dispatch(getUserAsync())
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     return (
         <DatabaseContext.Provider value={FirebaseClass}>
             <Switch>
